@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stopwatch & Clock</title>
+  <style>
+    
+
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+
+
+
+    body {
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+
+
+
+
+    .container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      max-width: 400px;
+    }
+
+
+
+
+
+    h1 {
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #00e0ff;
+    }
+
+
+
+
+
+    .clock, #stopwatch {
+      font-size: 48px;
+      margin: 20px 0;
+      font-weight: bold;
+      color: #00e0ff;
+      text-shadow: 0 0 20px #00e0ff;
+      transition: all 0.5s ease;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    .buttons button {
+      background: #00e0ff;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s;
+      box-shadow: 0 0 10px #00e0ff;
+    }
+
+    .buttons button:hover {
+      background: #007acc;
+      transform: scale(1.1);
+    }
+
+    .buttons button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Clock & Stopwatch</h1>
+
+    
+
+
+
+
+    <div class="clock" id="clock">00:00:00</div>
+
+    
+
+
+
+
+    <div class="stopwatch">
+      <div id="stopwatch">00:00:00</div>
+      <div class="buttons">
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+        <button id="reset">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+
+
+
+    function updateClock() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString();
+      document.getElementById('clock').textContent = timeString;
+    }
+    setInterval(updateClock, 1000);
+    updateClock(); 
+
+    
+    let startTime, elapsedTime = 0, timerInterval;
+
+
+
+
+    function formatTime(ms) {
+      const hours = String(Math.floor(ms / 3600000)).padStart(2, '0');
+      const minutes = String(Math.floor((ms % 3600000) / 60000)).padStart(2, '0');
+      const seconds = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+      return `${hours}:${minutes}:${seconds}`;
+    }
+
+    
+
+
+
+
+    function updateStopwatch() {
+      const time = Date.now() - startTime + elapsedTime;
+      document.getElementById('stopwatch').textContent = formatTime(time);
+    }
+
+    
+
+
+
+
+    document.getElementById('start').onclick = function () {
+      if (!timerInterval) {
+        startTime = Date.now();
+        timerInterval = setInterval(updateStopwatch, 1000);
+      }
+    };
+
+    
+
+
+
+
+    document.getElementById('stop').onclick = function () {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        elapsedTime += Date.now() - startTime;
+        timerInterval = null;
+      }
+    };
+
+
+
+
+
+
+    document.getElementById('reset').onclick = function () {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      elapsedTime = 0;
+      document.getElementById('stopwatch').textContent = "00:00:00";
+    };
+  </script>
+</body>
+</html>
