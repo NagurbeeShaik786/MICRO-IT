@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rock Paper Scissors Ultimate</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #83a4d4, #b6fbff);
+      text-align: center;
+      padding: 30px;
+    }
+
+
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+
+
+
+    .section {
+      margin: 20px 0;
+    }
+
+
+
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px;
+    }
+
+
+
+
+    select {
+      padding: 10px;
+      font-size: 16px;
+    }
+
+
+
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+
+
+
+    button:hover {
+      background: #0056b3;
+    }
+
+
+
+
+    .choices img {
+      width: 80px;
+      height: 80px;
+      margin: 10px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+
+
+
+
+    .choices img:hover {
+      transform: scale(1.1);
+    }
+
+
+
+
+
+    .scoreboard {
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+
+
+
+    .result {
+      font-size: 22px;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+
+
+
+  <h1>Rock Paper Scissors Ultimate</h1>
+
+  <div class="section">
+    <input type="text" id="player1Name" placeholder="Enter Player 1 Name" />
+    <input type="text" id="player2Name" placeholder="Enter Player 2 or 'Computer'" />
+    <select id="mode">
+      <option value="2p">2 Players</option>
+      <option value="1p">Play vs Computer</option>
+    </select>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+
+
+
+
+  <div id="gameArea" style="display:none">
+    <h2 id="turnDisplay">It's Player 1's turn</h2>
+
+    <div class="choices" id="choicesArea">
+      <img src="https://i.imgur.com/TON7C4l.png" alt="Rock" onclick="makeChoice('rock')" />
+      <img src="https://i.imgur.com/Pg0LJ0r.png" alt="Paper" onclick="makeChoice('paper')" />
+      <img src="https://i.imgur.com/pgjyhIZ.png" alt="Scissors" onclick="makeChoice('scissors')" />
+    </div>
+
+    <div class="scoreboard">
+      <div id="scoreDisplay"></div>
+    </div>
+
+
+
+
+    <div class="result" id="result">Make your move!</div>
+
+    <button onclick="resetScores()">Reset Scores</button>
+  </div>
+
+  <!-- Sound Effects -->
+  <audio id="winSound" src="https://www.fesliyanstudios.com/play-mp3/387"></audio>
+  <audio id="loseSound" src="https://www.fesliyanstudios.com/play-mp3/388"></audio>
+
+  <script>
+    let player1 = '', player2 = '', mode = '2p';
+    let player1Choice = null;
+    let turn = 1;
+    let scores = { player1: 0, player2: 0 };
+
+
+
+    function startGame() {
+      player1 = document.getElementById('player1Name').value || 'Player 1';
+      player2 = document.getElementById('player2Name').value || 'Player 2';
+      mode = document.getElementById('mode').value;
+
+      if (mode === '1p') player2 = 'Computer';
+
+      document.getElementById('gameArea').style.display = 'block';
+      document.getElementById('turnDisplay').textContent = `${player1}'s Turn`;
+
+      // Load scores from localStorage
+      let storedScores = JSON.parse(localStorage.getItem('rpsScores'));
+      if (storedScores && storedScores[player1] !== undefined && storedScores[player2] !== undefined) {
+        scores = {
+          player1: storedScores[player1],
+          player2: storedScores[player2]
+        };
+      } else {
+        scores = { player1: 0, player2: 0 };
+      }
+
+
+
+
+      updateScoreDisplay();
+    }
+
+    function makeChoice(choice) {
+      if (turn === 1) {
+        player1Choice = choice;
+
+        if (mode === '1p') {
+          const options = ['rock', 'paper', 'scissors'];
+          const computerChoice = options[Math.floor(Math.random() * 3)];
+          determineWinner(player1Choice, computerChoice);
+        } else {
+          document.getElementById('turnDisplay').textContent = `${player2}'s Turn`;
+          turn = 2;
+        }
+      } else {
+        determineWinner(player1Choice, choice);
+      }
+    }
+
+
+
+
+    function determineWinner(choice1, choice2) {
+      let result = '';
+      if (choice1 === choice2) {
+        result = "It's a Draw!";
+      } else if (
+        (choice1 === 'rock' && choice2 === 'scissors') ||
+        (choice1 === 'paper' && choice2 === 'rock') ||
+        (choice1 === 'scissors' && choice2 === 'paper')
+      ) {
+        result = `${player1} Wins!`;
+        scores.player1++;
+        document.getElementById('winSound').play();
+      } else {
+        result = `${player2} Wins!`;
+        scores.player2++;
+        document.getElementById('loseSound').play();
+      }
+
+
+
+
+      document.getElementById('result').textContent = result;
+      turn = 1;
+      document.getElementById('turnDisplay').textContent = `${player1}'s Turn`;
+      updateScoreDisplay();
+      saveScores();
+    }
+
+
+
+
+    function updateScoreDisplay() {
+      document.getElementById('scoreDisplay').innerHTML =
+        `${player1}: ${scores.player1} | ${player2}: ${scores.player2}`;
+    }
+
+    function saveScores() {
+      let stored = JSON.parse(localStorage.getItem('rpsScores')) || {};
+      stored[player1] = scores.player1;
+      stored[player2] = scores.player2;
+      localStorage.setItem('rpsScores', JSON.stringify(stored));
+    }
+
+
+
+
+    function resetScores() {
+      scores = { player1: 0, player2: 0 };
+      localStorage.removeItem('rpsScores');
+      updateScoreDisplay();
+      document.getElementById('result').textContent = "Scores reset. Start playing!";
+    }
+  </script>
+
+
+
+
+</body>
+</html>
